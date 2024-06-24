@@ -4,12 +4,14 @@ import APIService from "../services/APIService";
 function Register() {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [motto, setMotto] = useState<string>("");
+  const [profilePicture, setProfilePicture] = useState<string>("");
   const [message, setMessage] = useState<string>("");
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const data = await APIService.request("/register", "POST", { username, password });
+      const data = await APIService.request("/register", "POST", { username, password, motto, profile_picture: profilePicture });
       APIService.setToken(data.token);
       setMessage("User registered successfully");
     } catch (error) {
@@ -36,6 +38,22 @@ function Register() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+        <div>
+          <label>Motto:</label>
+          <input
+            type="text"
+            value={motto}
+            onChange={(e) => setMotto(e.target.value)}
+          />
+        </div>
+        <div>
+          <label>Profile Picture URL:</label>
+          <input
+            type="text"
+            value={profilePicture}
+            onChange={(e) => setProfilePicture(e.target.value)}
           />
         </div>
         <button type="submit">Register</button>

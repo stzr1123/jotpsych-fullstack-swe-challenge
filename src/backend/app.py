@@ -38,7 +38,12 @@ def create_app():
     def register():
         data = request.get_json()
         hashed_password = bcrypt.generate_password_hash(data['password']).decode('utf-8')
-        new_user = User(username=data['username'], password=hashed_password)
+        new_user = User(
+            username=data['username'],
+            password=hashed_password,
+            motto=data.get('motto', ''),
+            profile_picture=data.get('profile_picture', '')
+        )
         db.session.add(new_user)
         db.session.commit()
         access_token = create_access_token(identity={'username': new_user.username})
@@ -62,7 +67,12 @@ def create_app():
         user = User.query.filter_by(username=current_user['username']).first()
         if not user:
             return jsonify({'message': 'User not found'}), 404
-        return jsonify({'id': user.id, 'username': user.username}), 200
+        return jsonify({
+            'id': user.id,
+            'username': user.username,
+            'motto': user.motto,
+            'profile_picture': user.profile_picture
+        }), 200
 
     @app.route('/token', methods=['GET'])
     def get_token():
@@ -73,12 +83,12 @@ def create_app():
 
     return app
 
-
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(150), nullable=False)
-
+    motto = db.Column(db.String(250), nullable=True)
+    profile_picture = db.Column(db.String(250), nullable=True)
 
 if __name__ == '__main__':
     app = create_app()

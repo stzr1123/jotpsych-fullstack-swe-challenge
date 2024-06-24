@@ -5,7 +5,7 @@ class APIService {
 
   private constructor() {
     this.baseUrl = "http://localhost:3002";
-    this.appVersion = "1.0.0"; // Make sure to set this to a version < 1.2.0 for testing
+    this.appVersion = "1.0.0";
   }
 
   public static getInstance(): APIService {
@@ -43,12 +43,11 @@ class APIService {
       body: body ? JSON.stringify(body) : null,
     });
 
-    if (response.status === 426) {
-      const data = await response.json();
-      throw new Error(data.message);
-    }
-
     if (!response.ok) {
+      if (response.status === 426) {
+        const data = await response.json();
+        throw new Error(data.message);
+      }
       throw new Error("Network response was not ok");
     }
 

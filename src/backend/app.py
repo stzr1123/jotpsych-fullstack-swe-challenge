@@ -1,14 +1,14 @@
-from flask import Flask, request, jsonify, session
+from flask import Flask, request, jsonify, session, g
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from flask_cors import CORS
-
-import os
+from packaging import version
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
 jwt = JWTManager()
+
 
 def create_app():
     app = Flask(__name__)
@@ -26,6 +26,12 @@ def create_app():
     db.init_app(app)
     bcrypt.init_app(app)
     jwt.init_app(app)
+
+    @app.before_request
+    def check_app_version():
+        client_version = request.headers.get('app-version')
+        if client_version and version.parse(client_version) < version.parse("1.2.0"):
+            return jsonify({'message': 'Please update your client application'}), 426
 
     with app.app_context():
         db.create_all()
@@ -83,12 +89,14 @@ def create_app():
 
     return app
 
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(150), nullable=False)
     motto = db.Column(db.String(250), nullable=True)
     profile_picture = db.Column(db.String(250), nullable=True)
+
 
 if __name__ == '__main__':
     app = create_app()

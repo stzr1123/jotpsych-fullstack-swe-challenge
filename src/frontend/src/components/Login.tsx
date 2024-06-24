@@ -15,9 +15,9 @@ function Login() {
       APIService.setToken(data.token);
       setMessage("Login successful");
       navigate("/profile"); // Redirect to profile page
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      setMessage("Invalid credentials");
+      setMessage(error.message || "Invalid credentials");
     }
   };
 

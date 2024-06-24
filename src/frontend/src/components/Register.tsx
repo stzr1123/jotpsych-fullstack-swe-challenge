@@ -14,9 +14,9 @@ function Register() {
       const data = await APIService.request("/register", "POST", { username, password, motto, profile_picture: profilePicture });
       APIService.setToken(data.token);
       setMessage("User registered successfully");
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      setMessage("Error registering user");
+      setMessage(error.message || "Error registering user");
     }
   };
 

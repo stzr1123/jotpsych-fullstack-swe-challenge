@@ -50,3 +50,10 @@
 	•	Initially set the appVersion in APIService to 1.0.0 in useEffect hooks of Login and Register components.
 	•	After the initial interaction (successful login or registration), update the appVersion to 1.2.1 for subsequent requests.
 
+## Encrypt it
+
+	•	Objective: Ensure the patient’s motto is stored securely by encrypting it when storing and decrypting it when retrieving.
+	•	Installed cryptography library: Used for encryption and decryption of the motto.
+	•	Generated encryption key: Added a key for encryption/decryption using cryptography.fernet.Fernet.
+	•	Modified the /register endpoint: Encrypted the motto before storing it in the database.
+	•	Modified the /user endpoint: Decrypted the motto before returning it in the response.

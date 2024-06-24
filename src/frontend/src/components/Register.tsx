@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import APIService from "../services/APIService";
 
 function Register() {
@@ -8,6 +8,11 @@ function Register() {
   const [profilePicture, setProfilePicture] = useState<string>("");
   const [message, setMessage] = useState<string>("");
 
+  useEffect(() => {
+    // Simulate initial version below 1.2.0
+    APIService.setAppVersion("1.0.0");
+  }, []);
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -15,6 +20,8 @@ function Register() {
       APIService.setToken(data.token);
       setMessage("User registered successfully");
     } catch (error: any) {
+      // Update to version above 1.2.0 after the initial interaction
+      APIService.setAppVersion("1.2.1");
       console.error(error);
       setMessage(error.message || "Error registering user");
     }

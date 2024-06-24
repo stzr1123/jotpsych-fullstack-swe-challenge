@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import APIService from "../services/APIService";
 
@@ -8,6 +8,11 @@ function Login() {
   const [message, setMessage] = useState<string>("");
   const navigate = useNavigate();
 
+  useEffect(() => {
+    // Simulate initial version below 1.2.0
+    APIService.setAppVersion("1.0.0");
+  }, []);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -16,6 +21,8 @@ function Login() {
       setMessage("Login successful");
       navigate("/profile"); // Redirect to profile page
     } catch (error: any) {
+      // Update to version above 1.2.0 after the initial interaction
+      APIService.setAppVersion("1.2.1");
       console.error(error);
       setMessage(error.message || "Invalid credentials");
     }

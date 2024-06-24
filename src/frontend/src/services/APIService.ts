@@ -5,7 +5,7 @@ class APIService {
 
   private constructor() {
     this.baseUrl = "http://localhost:3002";
-    this.appVersion = "1.0.0";
+    this.appVersion = "1.0.0"; // Initial version below 1.2.0
   }
 
   public static getInstance(): APIService {
@@ -46,7 +46,7 @@ class APIService {
     if (!response.ok) {
       if (response.status === 426) {
         const data = await response.json();
-        throw new Error(data.message);
+        throw new Error(data.message); // Throw error with message for update prompt
       }
       throw new Error("Network response was not ok");
     }
@@ -60,6 +60,10 @@ class APIService {
 
   public clearToken(): void {
     localStorage.removeItem('token');
+  }
+
+  public setAppVersion(version: string): void {
+    this.appVersion = version;
   }
 }
 

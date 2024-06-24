@@ -1,10 +1,12 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import APIService from "../services/APIService";
 
 function Login() {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [message, setMessage] = useState<string>("");
+  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -12,7 +14,9 @@ function Login() {
       const data = await APIService.request("/login", "POST", { username, password });
       APIService.setToken(data.token);
       setMessage("Login successful");
+      navigate("/profile"); // Redirect to profile page
     } catch (error) {
+      console.error(error);
       setMessage("Invalid credentials");
     }
   };

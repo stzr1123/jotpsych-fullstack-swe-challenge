@@ -1,3 +1,4 @@
+from cryptography.fernet import Fernet
 from flask import Flask, request, jsonify, session, g
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
@@ -8,6 +9,9 @@ from packaging import version
 db = SQLAlchemy()
 bcrypt = Bcrypt()
 jwt = JWTManager()
+
+encryption_key = Fernet.generate_key()
+cipher = Fernet(encryption_key)
 
 
 def create_app():
@@ -44,10 +48,11 @@ def create_app():
     def register():
         data = request.get_json()
         hashed_password = bcrypt.generate_password_hash(data['password']).decode('utf-8')
+        encrypted_motto = cipher.encrypt(data.get('motto', '').encode()).decode()
         new_user = User(
             username=data['username'],
             password=hashed_password,
-            motto=data.get('motto', ''),
+            motto=encrypted_motto,
             profile_picture=data.get('profile_picture', '')
         )
         db.session.add(new_user)
@@ -73,10 +78,11 @@ def create_app():
         user = User.query.filter_by(username=current_user['username']).first()
         if not user:
             return jsonify({'message': 'User not found'}), 404
+        decrypted_motto = cipher.decrypt(user.motto.encode()).decode() if user.motto else ''
         return jsonify({
             'id': user.id,
             'username': user.username,
-            'motto': user.motto,
+            'motto': decrypted_motto,
             'profile_picture': user.profile_picture
         }), 200
 

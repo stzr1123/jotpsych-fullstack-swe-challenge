@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import APIService from "../services/APIService";
 
 function Register() {
   const [username, setUsername] = useState<string>("");
@@ -7,15 +8,14 @@ function Register() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    const response = await fetch("http://localhost:3002/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ username, password }),
-    });
-    const data = await response.json();
-    setMessage(data.message);
+    try {
+      const data = await APIService.request("/register", "POST", { username, password });
+      APIService.setToken(data.token);
+      setMessage("User registered successfully");
+    } catch (error) {
+      console.error(error);
+      setMessage("Error registering user");
+    }
   };
 
   return (

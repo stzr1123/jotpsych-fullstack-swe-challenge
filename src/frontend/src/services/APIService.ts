@@ -15,6 +15,10 @@ class APIService {
     return APIService.instance;
   }
 
+  public getToken(): string | null {
+    return localStorage.getItem('token');
+  }
+
   public async request(
     endpoint: string,
     method: string,
@@ -27,7 +31,7 @@ class APIService {
     };
 
     if (auth) {
-      // get access token somehow
+      const token = this.getToken();
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
       }
@@ -44,6 +48,14 @@ class APIService {
     }
 
     return response.json();
+  }
+
+  public setToken(token: string): void {
+    localStorage.setItem('token', token);
+  }
+
+  public clearToken(): void {
+    localStorage.removeItem('token');
   }
 }
 

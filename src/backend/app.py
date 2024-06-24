@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
@@ -10,7 +10,6 @@ db = SQLAlchemy()
 bcrypt = Bcrypt()
 jwt = JWTManager()
 
-
 def create_app():
     app = Flask(__name__)
 
@@ -20,10 +19,8 @@ def create_app():
 
     CORS(
         app,
-        resources={r"*": {"origins": ["*"]}},
-        allow_headers=["Authorization", "Content-Type"],
-        methods=["GET", "POST", "OPTIONS"],
-        max_age=86400
+        resources={r"/*": {"origins": ["http://localhost:5173"]}},
+        supports_credentials=True
     )
 
     db.init_app(app)
@@ -40,20 +37,21 @@ def create_app():
     @app.route('/register', methods=['POST'])
     def register():
         data = request.get_json()
-        hashed_password = bcrypt.generate_password_hash(
-            data['password']).decode('utf-8')
+        hashed_password = bcrypt.generate_password_hash(data['password']).decode('utf-8')
         new_user = User(username=data['username'], password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
-        return jsonify({'message': 'User registered successfully'}), 201
+        access_token = create_access_token(identity={'username': new_user.username})
+        session['token'] = access_token
+        return jsonify({'message': 'User registered successfully', 'token': access_token}), 201
 
     @app.route('/login', methods=['POST'])
     def login():
         data = request.get_json()
         user = User.query.filter_by(username=data['username']).first()
         if user and bcrypt.check_password_hash(user.password, data['password']):
-            access_token = create_access_token(
-                identity={'username': user.username})
+            access_token = create_access_token(identity={'username': user.username})
+            session['token'] = access_token
             return jsonify({'token': access_token}), 200
         return jsonify({'message': 'Invalid credentials'}), 401
 
@@ -61,7 +59,17 @@ def create_app():
     @jwt_required()
     def user():
         current_user = get_jwt_identity()
-        # return user information
+        user = User.query.filter_by(username=current_user['username']).first()
+        if not user:
+            return jsonify({'message': 'User not found'}), 404
+        return jsonify({'id': user.id, 'username': user.username}), 200
+
+    @app.route('/token', methods=['GET'])
+    def get_token():
+        token = session.get('token')
+        if not token:
+            return jsonify({'message': 'No token found'}), 404
+        return jsonify({'token': token}), 200
 
     return app
 

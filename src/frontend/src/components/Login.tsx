@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import APIService from "../services/APIService";
 
 function Login() {
   const [username, setUsername] = useState<string>("");
@@ -7,20 +8,12 @@ function Login() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const response = await fetch("http://localhost:3002/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ username, password }),
-    });
-    const data = await response.json();
-    if (response.ok) {
-      // do something with access token
-
+    try {
+      const data = await APIService.request("/login", "POST", { username, password });
+      APIService.setToken(data.token);
       setMessage("Login successful");
-    } else {
-      setMessage(data.message);
+    } catch (error) {
+      setMessage("Invalid credentials");
     }
   };
 
